@@ -1,0 +1,22 @@
+{
+    "name": "ACC-Dev-Container",
+
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+    "customizations": {
+        "vscode": {
+            "settings": {},
+
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools"
+            ]
+        }
+    },
+
+    "postCreateCommand": "git --version && gcc --version && docker --version"
+}
