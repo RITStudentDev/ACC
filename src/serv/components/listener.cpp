@@ -43,5 +43,6 @@ int HTTP_Listener::init_socket(){
             continue;
         }
     }
+    close(socket_fd);
     return 0;
 }
