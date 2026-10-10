@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 
 struct HTTPMsg{
     // Method
@@ -12,11 +13,15 @@ class HTTP_Parser{
     public:
         HTTP_Parser() = default;
 
-    private:
         int parse();
+
+    private:
         // Helpers to read deserialized 
-        bool isDigit(char c);
-        bool isAlpha(char c);
-        bool isTchar(char c);
+        constexpr bool isDigit(char c);
+        constexpr bool isAlpha(char c);
+        constexpr bool isTchar(char c);
+
+        // Determines parsing method
+        int parse_method(std::string_view method);
 
 };
