@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <cstdio>
+#include <cstdlib>
 
 /**
  * This file contains the declarations for the HTTP listener.
@@ -15,7 +16,7 @@ class HTTP_Listener{
     public:
         HTTP_Listener(){
             if(init_socket() < 0){
-                perror("Socket init failed on listener.");
+                perror("Init_socket:");
                 // Clean socket descriptor
             }
         }
