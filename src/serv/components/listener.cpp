@@ -2,6 +2,7 @@
 
 #define BUFFER_SIZE = 2048
 
+// Creates a listening socket on the server
 int HTTP_Listener::init_socket(){
     int socket_fd;
     int opt = 1;
