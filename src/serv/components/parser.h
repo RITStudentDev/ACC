@@ -2,7 +2,7 @@
 
 #include <string>
 
-struct HTTPMsg{
+struct HTTP_msg{
     // Method
     // Headers
     // Body - optional
@@ -22,6 +22,8 @@ class HTTP_Parser{
         constexpr bool isTchar(char c);
 
         // Determines parsing method
-        int parse_method(std::string_view method);
+        int parse_method(std::string_view in);
+        // Determines the target of the request
+        int parse_target(std::string_view in);
 
 };

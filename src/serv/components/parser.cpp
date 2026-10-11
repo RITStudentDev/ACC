@@ -13,13 +13,25 @@ bool HTTP_Parser::isTchar(char c){
         || isDigit(c) || isAlpha(c);
 }
 
-int HTTP_Parser::parse_method(std::string_view method){
-    const size_t len =  method.size();
-    size_t i = 0;
+int HTTP_Parser::parse_method(std::string_view in){
+    const int len =  in.size();
+    int i = 0;
 
-    while(i < len && isTchar(method[i])) ++i;
+    while(i < len && isTchar(in[i])) ++i;
     
     if (i == len) return -1;
-    if (i == 0 || method[i] != ' ') return -2;
-    return static_cast<int>(i);
+    if (i == 0 || in[i] != ' ') return -2;
+    return i;
+}
+
+int HTTP_Parser::parse_target(std::string_view in){
+    const auto* p = reinterpret_cast<const unsigned char*>(in.data());
+    const int len = in.size();
+    int i = 0;
+
+    while(i < len && static_cast<unsigned char>(p[i] - 0x21) < 0x5E) ++i;
+    if(i == len) return -1;
+    if(i == 0 || p[i] != ' ') return -2;
+    return i;
+
 }
