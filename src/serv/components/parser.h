@@ -1,12 +1,12 @@
 #pragma once
 
+#include <cstring>
 #include <string>
+#include <string_view>
 
-struct HTTP_msg{
-    // Method
-    // Headers
-    // Body - optional
-    // Route
+struct Header{
+    std::string name;
+    std::string value;
 };
 
 class HTTP_Parser{
@@ -16,14 +16,18 @@ class HTTP_Parser{
         int parse();
 
     private:
-        // Helpers to read deserialized 
+        // Helpers to read deserialized message
         constexpr bool isDigit(char c);
         constexpr bool isAlpha(char c);
         constexpr bool isTchar(char c);
+        constexpr bool isVchar(char c);
+        bool consume(std::string_view in, std::string_view x);
 
-        // Determines parsing method
+        // Functions to parse the message
         int parse_method(std::string_view in);
-        // Determines the target of the request
         int parse_target(std::string_view in);
+        int parse_version(std::string_view in, int* minor);
+        int parse_header(std::string_view in, Header* h);
+
 
 };
