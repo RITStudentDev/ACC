@@ -55,8 +55,29 @@ int HTTP_Parser::parse_version(std::string_view in, int* minor){
 }
 
 int HTTP_Parser::parse_header(std::string_view in, Header* h){
-    int len = in.size();
+    const int len = in.size();
     int i = 0;
-    if (1 >= len - i || in[i] != '\r' || in[i+1] != '\n') return -1;
+
+    while(i < len && isTchar(in[i])) ++i;
+    if (i == len) return -1;
+    if (i == 0 || in[i] != ':') return -2;
+    const int n_end = ++i;
+
+    while (i < len && (in[i] == ' ' || in[i] == '\t')) ++i;
+    const int v_start = i;
+    int v_end = i;
+    while (i < len){
+        const char c = in[i];
+        if (isVchar(c)) v_end = ++i;
+        else if (c == ' ' || c == '\t') ++i;
+        else break;
+    }
+
+    if (i == len) return -1;
+    if (in[i] != '\r') return -2;
+    if (i+1 == len) return -1;
+    if (in[i+1] != '\n') return -2;
+    h->name = in.substr(0, n_end);
+    h->value = in.substr(v_start, v_end - v_start);
     return 0;
 }
