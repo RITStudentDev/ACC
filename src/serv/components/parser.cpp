@@ -81,3 +81,13 @@ int HTTP_Parser::parse_header(std::string_view in, Header* h){
     h->value = in.substr(v_start, v_end - v_start);
     return 0;
 }
+
+int HTTP_Parser::parse_header_list(std::string_view in, Header* h, int max_headers){
+    int n_headers = 0;
+    while (!consume(in, "\r\n")){
+        if (n_headers == max_headers) return -1;
+        if (parse_header(in, &h[n_headers]) < 0) return -1;
+        n_headers++;
+    }
+    return n_headers;
+}

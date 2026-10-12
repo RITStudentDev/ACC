@@ -28,6 +28,7 @@ class HTTP_Parser{
         int parse_target(std::string_view in);
         int parse_version(std::string_view in, int* minor);
         int parse_header(std::string_view in, Header* h);
+        int parse_header_list(std::string_view in, Header* h,int max_headers);
 
 
 };
