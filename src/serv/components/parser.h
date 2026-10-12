@@ -9,6 +9,10 @@ struct Header{
     std::string value;
 };
 
+struct Request{
+
+};
+
 class HTTP_Parser{
     public:
         HTTP_Parser() = default;
@@ -29,6 +33,7 @@ class HTTP_Parser{
         int parse_version(std::string_view in, int* minor);
         int parse_header(std::string_view in, Header* h);
         int parse_header_list(std::string_view in, Header* h,int max_headers);
+        int parse_request(std::string_view in, Request* req);
 
 
 };
