@@ -1,4 +1,7 @@
 #pragma once
+
+#include <thread>
+#include "listener.h"
 #include "parser.h"
 
 /**
@@ -11,4 +14,11 @@ class HTTP_Server{
         HTTP_Server() = default;
 
         int start_server();
+        int run_loop();
+    private:
+        bool running_ = false;
+        HTTP_Listener listener_;
+        HTTP_Parser parser_;
+
+        int onRecv();
 };

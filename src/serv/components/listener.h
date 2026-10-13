@@ -30,6 +30,7 @@ class HTTP_Listener{
                 return *this;
             }
         }
-    private:
+
         int init_socket();
+        int onRecv();
 };
