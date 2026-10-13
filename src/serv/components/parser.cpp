@@ -20,18 +20,19 @@ bool HTTP_Parser::consume(std::string_view in, std::string_view x){
     return !x.empty() && x.size() < in.size() && std::memcmp(in.data(), x.data(), x.size()) == 0;
 }
 
-int HTTP_Parser::parse_method(std::string_view in){
+int HTTP_Parser::parse_method(std::string_view in, std::string_view* method){
     const int len =  in.size();
     int i = 0;
 
     while(i < len && isTchar(in[i])) ++i;
-    
     if (i == len) return -1;
     if (i == 0 || in[i] != ' ') return -2;
+
+    *method = in.substr(0, i);
     return 0;
 }
 
-int HTTP_Parser::parse_target(std::string_view in){
+int HTTP_Parser::parse_target(std::string_view in, std::string_view* target){
     const auto* p = reinterpret_cast<const unsigned char*>(in.data());
     const int len = in.size();
     int i = 0;
@@ -39,6 +40,8 @@ int HTTP_Parser::parse_target(std::string_view in){
     while(i < len && static_cast<unsigned char>(p[i] - 0x21) < 0x5E) ++i;
     if(i == len) return -1;
     if(i == 0 || p[i] != ' ') return -2;
+
+    *target = in.substr(0, i);
     return 0;
 }
 
@@ -90,4 +93,15 @@ int HTTP_Parser::parse_header_list(std::string_view in, Header* h, int max_heade
         n_headers++;
     }
     return n_headers;
+}
+
+int HTTP_Parser::parse_request(std::string_view in, Request* req){
+    if (parse_method(in, &req->method) < 0) return -1;
+    if(parse_target(in, &req->target) < 0) return -1;
+    if(parse_version(in, &req->minor) < 0) return -1;
+    
+    int ret = parse_header_list(in, req->headers, (int) COUNT(req->headers));
+    if (ret < 0) return -1;
+    req->n_headers = ret;
+    return 0;
 }
