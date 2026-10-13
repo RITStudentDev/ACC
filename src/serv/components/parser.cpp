@@ -16,11 +16,15 @@ bool HTTP_Parser::isVchar(char c){
     return c >= ' ' && c <= '~';
 }
 
-bool HTTP_Parser::consume(std::string_view in, std::string_view x){
-    return !x.empty() && x.size() < in.size() && std::memcmp(in.data(), x.data(), x.size()) == 0;
+bool HTTP_Parser::consume(std::string_view& in, std::string_view x){
+    if (in.substr(0, x.size()) == x){
+        in.remove_prefix(x.size());
+        return true;
+    }
+    return false;
 }
 
-int HTTP_Parser::parse_method(std::string_view in, std::string_view* method){
+int HTTP_Parser::parse_method(std::string_view& in, std::string_view* method){
     const int len =  in.size();
     int i = 0;
 
@@ -29,23 +33,24 @@ int HTTP_Parser::parse_method(std::string_view in, std::string_view* method){
     if (i == 0 || in[i] != ' ') return -2;
 
     *method = in.substr(0, i);
+    in.remove_prefix(i+1);
     return 0;
 }
 
-int HTTP_Parser::parse_target(std::string_view in, std::string_view* target){
-    const auto* p = reinterpret_cast<const unsigned char*>(in.data());
+int HTTP_Parser::parse_target(std::string_view& in, std::string_view* target){
     const int len = in.size();
     int i = 0;
 
-    while(i < len && static_cast<unsigned char>(p[i] - 0x21) < 0x5E) ++i;
+    while(i < len && in[i] > ' ' && in[i] <= '~') ++i;
     if(i == len) return -1;
-    if(i == 0 || p[i] != ' ') return -2;
+    if(i == 0 || in[i] != ' ') return -2;
 
     *target = in.substr(0, i);
+    in.remove_prefix(i+1);
     return 0;
 }
 
-int HTTP_Parser::parse_version(std::string_view in, int* minor){
+int HTTP_Parser::parse_version(std::string_view& in, int* minor){
     if (consume(in, "HTTP/1.0\r\n")){
         *minor = 0;
         return 0;
@@ -57,21 +62,22 @@ int HTTP_Parser::parse_version(std::string_view in, int* minor){
     return -1;
 }
 
-int HTTP_Parser::parse_header(std::string_view in, Header* h){
+int HTTP_Parser::parse_header(std::string_view& in, Header* h){
     const int len = in.size();
     int i = 0;
 
     while(i < len && isTchar(in[i])) ++i;
     if (i == len) return -1;
     if (i == 0 || in[i] != ':') return -2;
-    const int n_end = ++i;
+    const int n_end = i;
+    ++i;
 
     while (i < len && (in[i] == ' ' || in[i] == '\t')) ++i;
     const int v_start = i;
     int v_end = i;
     while (i < len){
         const char c = in[i];
-        if (isVchar(c)) v_end = ++i;
+        if (isVchar(c) && c != ' ') v_end = ++i;
         else if (c == ' ' || c == '\t') ++i;
         else break;
     }
@@ -80,12 +86,14 @@ int HTTP_Parser::parse_header(std::string_view in, Header* h){
     if (in[i] != '\r') return -2;
     if (i+1 == len) return -1;
     if (in[i+1] != '\n') return -2;
+
     h->name = in.substr(0, n_end);
     h->value = in.substr(v_start, v_end - v_start);
+    in.remove_prefix(i+2);
     return 0;
 }
 
-int HTTP_Parser::parse_header_list(std::string_view in, Header* h, int max_headers){
+int HTTP_Parser::parse_header_list(std::string_view& in, Header* h, int max_headers){
     int n_headers = 0;
     while (!consume(in, "\r\n")){
         if (n_headers == max_headers) return -1;
@@ -96,12 +104,13 @@ int HTTP_Parser::parse_header_list(std::string_view in, Header* h, int max_heade
 }
 
 int HTTP_Parser::parse_request(std::string_view in, Request* req){
-    if (parse_method(in, &req->method) < 0) return -1;
-    if(parse_target(in, &req->target) < 0) return -1;
-    if(parse_version(in, &req->minor) < 0) return -1;
-    
-    int ret = parse_header_list(in, req->headers, (int) COUNT(req->headers));
-    if (ret < 0) return -1;
-    req->n_headers = ret;
+    int rc;
+    if ((rc = parse_method(in, &req->method)) < 0) return rc;
+    if ((rc = parse_target(in, &req->target)) < 0) return rc;
+    if ((rc = parse_version(in, &req->minor)) < 0) return rc;
+
+    rc = parse_header_list(in, req->headers, MAX_HEADERS);
+    if (rc < 0) return rc;
+    req->n_headers = rc;
     return 0;
 }

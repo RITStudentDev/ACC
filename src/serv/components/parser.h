@@ -32,12 +32,12 @@ class HTTP_Parser{
         static bool isAlpha(char c);
         static bool isTchar(char c);
         static bool isVchar(char c);
-        static bool consume(std::string_view in, std::string_view x);
+        static bool consume(std::string_view& in, std::string_view x);
 
         // Functions to parse the message
-        int parse_method(std::string_view in, std::string_view* method);
-        int parse_target(std::string_view in, std::string_view* target);
-        int parse_version(std::string_view in, int* minor);
-        int parse_header(std::string_view in, Header* h);
-        int parse_header_list(std::string_view in, Header* h,int max_headers);
+        int parse_method(std::string_view& in, std::string_view* method);
+        int parse_target(std::string_view& in, std::string_view* target);
+        int parse_version(std::string_view& in, int* minor);
+        int parse_header(std::string_view& in, Header* h);
+        int parse_header_list(std::string_view& in, Header* h,int max_headers);
 };
