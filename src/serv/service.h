@@ -1,6 +1,9 @@
 #pragma once
 
-#include <thread>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <cerrno>
+#include <unordered_map>
 #include "listener.h"
 #include "parser.h"
 
@@ -17,8 +20,12 @@ class HTTP_Server{
         int run_loop();
     private:
         bool running_ = false;
+        int listenfd_;
+        int epollfd_;
         HTTP_Listener listener_;
         HTTP_Parser parser_;
 
-        int onRecv();
+        int init_epoll();
+        int onRecv(int fd);
+        int closeConn(int fd);
 };
