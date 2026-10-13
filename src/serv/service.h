@@ -1,4 +1,5 @@
 #pragma once
+#include "parser.h"
 
 /**
  * This header contains the declarations for the hosting service.
