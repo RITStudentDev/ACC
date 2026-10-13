@@ -23,6 +23,23 @@ int HTTP_Server::start_server(){
     return 0;
 }
 
+int HTTP_Server::onAccept(){
+    for (;;){
+        int fd = accept4(listenfd_, nullptr, nullptr, SOCK_NONBLOCK);
+        if (fd < 0) return -1;
+
+        epoll_event ev{};
+        ev.events = EPOLLIN | EPOLLET;
+        ev.data.fd = fd;
+        if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &ev) < 0){
+            close(fd);
+            continue;
+        }
+        conns_.emplace(fd, std::string{});
+    }
+    return 0;
+}
+
 int HTTP_Server::onRecv(int fd){
     char buf[4096];
     Request req;
@@ -42,7 +59,7 @@ int HTTP_Server::run_loop(){
         }
         for (int i = 0; i < n; ++i){
             int fd = events[i].data.fd;
-            if (fd == listenfd_) continue;// epoll handling on accepted connection
+            if (fd == listenfd_) onAccept();
             else if (events[i].events & (EPOLLERR | EPOLLHUP)) closeConn(fd);
             else if (events[i].events & EPOLLIN) if (onRecv(fd) < 0) closeConn(fd);
         }
