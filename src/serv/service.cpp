@@ -41,10 +41,33 @@ int HTTP_Server::onAccept(){
 }
 
 int HTTP_Server::onRecv(int fd){
-    char buf[4096];
-    Request req;
-    if(recv(fd, buf, sizeof(buf), 0) < 0) return -1;
-    return parser_.parse_request(std::string_view(buf), &req);
+    auto it = conns_.find(fd);
+    if (it == conns_.end()) return -1;
+    std::string& buf = it->second;
+
+    char tmp[4096];
+    for (;;){
+        int n = recv(fd, tmp, sizeof(tmp), 0);
+        if (n > 0){
+            buf.append(tmp, n);
+            if (buf.size() > 64 * 1024) return -1;
+            continue;
+        }
+        if (n == 0) return -1;
+        if (errno == EINTR) continue;
+        if (errno == EAGAIN || errno == EWOULDBLOCK) break;
+        return -1;  
+    }
+
+    while (!buf.empty()){
+        Request req;
+        int used = parser_.parse_request(buf, &req);
+        if (used == -1) return 0;
+        else return -1;
+
+        buf.erase(0, used);
+    }
+    return 0;
 }
 
 int HTTP_Server::run_loop(){
