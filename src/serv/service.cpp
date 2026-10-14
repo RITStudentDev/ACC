@@ -1,12 +1,15 @@
 #include "service.h"
+#include <print>
 
 /**
  * This file contains the implementations for the content of the service header.
  */
 HTTP_Server::HTTP_Server() :
     listener_(HTTP_Listener()),
-    parser_(HTTP_Parser())
-    {}
+    parser_(std::move(HTTP_Parser()))
+    {
+        std::println("Server in construction"); // Debug
+    }
 
 int HTTP_Server::init_epoll(){
     epollfd_ = epoll_create1(0);
@@ -19,6 +22,8 @@ int HTTP_Server::init_epoll(){
 }
 
 int HTTP_Server::start_server(){
+    std::println("Reached start server"); // Debug
+    this->init_epoll();
     running_ = true;
     return 0;
 }
@@ -67,6 +72,11 @@ int HTTP_Server::onRecv(int fd){
 
         buf.erase(0, used);
     }
+    return 0;
+}
+
+int HTTP_Server::closeConn(int fd){
+    close(fd);
     return 0;
 }
 

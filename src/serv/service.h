@@ -15,7 +15,7 @@
  */
 class HTTP_Server{
     public:
-        HTTP_Server() = default;
+        HTTP_Server();
 
         int start_server();
         int run_loop();

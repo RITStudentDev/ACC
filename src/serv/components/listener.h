@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <print>
+
 /**
  * This file contains the declarations for the HTTP listener.
  * Its purpose is to handle incoming TCP connections and andle input of HTTP traffic.
@@ -15,10 +17,8 @@
 class HTTP_Listener{
     public:
         HTTP_Listener(){
-            if(init_socket() < 0){
-                perror("Init_socket:");
-                // Clean socket descriptor
-            }
+            if(init_socket() < 0)perror("Init_socket:");
+            else std::println("Started listening");
         }
 
         ~HTTP_Listener(){
