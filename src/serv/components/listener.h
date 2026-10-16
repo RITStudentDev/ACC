@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <cstdio>
 #include <cstdlib>
+#include <thread>
 
 #include <print>
 
@@ -22,7 +23,7 @@ class HTTP_Listener{
         }
 
         ~HTTP_Listener(){
-            // End connections
+            stop();
         }
 
         HTTP_Listener& operator=(const HTTP_Listener&& origin){
@@ -31,6 +32,10 @@ class HTTP_Listener{
             }
         }
 
+        int socket_fd_ = -1;
+        std::thread l_thread_;
+
         int init_socket();
-        int onRecv();
+        void stop();
+        int listen_loop();
 };
