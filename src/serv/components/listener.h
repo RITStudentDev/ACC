@@ -6,6 +6,9 @@
 #include <netinet/in.h>
 #include <cstdio>
 #include <cstdlib>
+#include <thread>
+
+#include <print>
 
 /**
  * This file contains the declarations for the HTTP listener.
@@ -15,14 +18,12 @@
 class HTTP_Listener{
     public:
         HTTP_Listener(){
-            if(init_socket() < 0){
-                perror("Init_socket:");
-                // Clean socket descriptor
-            }
+            if(init_socket() < 0)perror("Init_socket:");
+            else std::println("Started listening");
         }
 
         ~HTTP_Listener(){
-            // End connections
+            stop();
         }
 
         HTTP_Listener& operator=(const HTTP_Listener&& origin){
@@ -30,6 +31,11 @@ class HTTP_Listener{
                 return *this;
             }
         }
-    private:
+
+        int socket_fd_ = -1;
+        std::thread l_thread_;
+
         int init_socket();
+        void stop();
+        int listen_loop();
 };
