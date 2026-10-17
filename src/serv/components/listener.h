@@ -17,10 +17,7 @@
 
 class HTTP_Listener{
     public:
-        HTTP_Listener(){
-            if(init_socket() < 0)perror("Init_socket:");
-            else std::println("Started listening");
-        }
+        HTTP_Listener(){}
 
         ~HTTP_Listener(){
             stop();

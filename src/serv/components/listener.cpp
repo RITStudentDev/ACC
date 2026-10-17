@@ -22,7 +22,7 @@ int HTTP_Listener::init_socket(){
     }
 
     socket_fd_ = socket_fd;
-    return 0;
+    return socket_fd;
 }
 
 int HTTP_Listener::listen_loop(){

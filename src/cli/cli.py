@@ -1,4 +1,5 @@
 import argparse
+import sys
 from cli import cmds
 
 def main(argv=None):

@@ -82,9 +82,11 @@ int HTTP_Server::onRecv(int fd){
         if (errno == EAGAIN || errno == EWOULDBLOCK) break;
         return -1;  
     }
-
+    
+    std::println("onRecv fd={} bytes={}", fd, buf.size());
     Request req;
     int used = parser_.parse_request(buf, &req);
+    std::println("parse_request returned {}", used);
     if (used == 0 || used == -1) return 0;
     if (used < -1) return -1;
     send_response(fd);
