@@ -1,6 +1,8 @@
 #pragma once
 
 #include <sys/epoll.h>
+#include <sys/signalfd.h>
+#include <csignal>
 #include <unistd.h>
 #include <cerrno>
 #include <unordered_map>
@@ -16,13 +18,15 @@
 class HTTP_Server{
     public:
         HTTP_Server();
+        ~HTTP_Server();
 
         int start_server();
         int run_loop();
     private:
         bool running_ = false;
-        int listenfd_;
-        int epollfd_;
+        int listenfd_ = -1;
+        int epollfd_ = -1;
+        int sigfd_ = -1;
         std::unordered_map<int, std::string> conns_;
         HTTP_Listener listener_;
         HTTP_Parser parser_;
@@ -30,5 +34,7 @@ class HTTP_Server{
         int init_epoll();
         int onAccept();
         int onRecv(int fd);
+        static void send_response(int fd);
         int closeConn(int fd);
+        void clean();
 };
