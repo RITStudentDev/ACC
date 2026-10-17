@@ -85,12 +85,12 @@ int HTTP_Server::onRecv(int fd){
     
     std::println("onRecv fd={} bytes={}", fd, buf.size());
     Request req;
-    int used = parser_.parse_request(buf, &req);
-    std::println("parse_request returned {}", used);
-    if (used == 0 || used == -1) return 0;
-    if (used < -1) return -1;
+    int rc = parser_.parse_request(buf, &req);
+    std::println("parse_request returned {}", rc);
+    if (rc == PARSE_INCOMPLETE) return 0;
+    if (rc < 0) return -1;
     send_response(fd);
-    return 0;
+    return -1;
 }
 
 int HTTP_Server::closeConn(int fd){

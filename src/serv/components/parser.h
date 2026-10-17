@@ -7,6 +7,12 @@
 #define MAX_HEADERS 128
 #define COUNT(X) (sizeof(X) / sizeof((X[0])))
 
+enum ParseStatus {
+    PARSE_OK = 0,
+    PARSE_INCOMPLETE = -1,
+    PARSE_MALFORMED  = -2,
+};
+
 struct Header{
     std::string name;
     std::string value;
