@@ -1,6 +1,5 @@
 FROM fedora:latest
 
-# Install development tools
 RUN dnf -y update && \
     dnf -y install \
         git \
@@ -11,10 +10,14 @@ RUN dnf -y update && \
         docker-cli \
         sudo \
         which \
+        python3 \
+        python3-devel \
+        python3-pip \
+        pybind11-devel \
+        python3-pybind11 \
         && \
     dnf clean all
 
-# Create a non-root development user
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=1000

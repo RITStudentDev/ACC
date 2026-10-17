@@ -4,6 +4,10 @@ project(ACC)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(pybind11 CONFIG REQUIRED)
+pybind11_add_module(_core src/cli/binds.cpp)
+install(TARGETS _core LIBRARY DESTINATION acc)
+
 add_executable(ACC
     src/serv/components/listener.cpp
     src/serv/components/parser.cpp
