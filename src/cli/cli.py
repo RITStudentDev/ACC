@@ -1,10 +1,10 @@
 import argparse
-from acc import http
+from cli import cmds
 
 def main(argv=None):
-    parser = argparse.ArguementParser(prog="acc")
+    parser = argparse.ArgumentParser(prog="acc")
     services = parser.add_subparsers(dest="service", required=True)
-    http.register(services)
+    cmds.register(services)
     args = parser.parse_args(argv)
     try:
         return args.func(args)

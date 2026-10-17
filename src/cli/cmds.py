@@ -1,5 +1,5 @@
 import socket
-from acc import _core
+from cli import _core
 
 def register(services):
     svc = services.add_parser("http", help="HTTP operations")
@@ -15,8 +15,8 @@ def register(services):
 def run_ping(args):
     with socket.create_connection((args.host, args.port), timeout=args.timeout) as s:
         s.setblocking(True)
-        s.settimeout(args.timeout)
         _core.http_ping(s.fileno(), args.host, args.path)
+        s.settimeout(args.timeout)
         chunks = []
         while chunk := s.recv(4096):
             chunks.append(chunk)
