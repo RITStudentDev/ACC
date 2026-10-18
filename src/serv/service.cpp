@@ -83,10 +83,9 @@ int HTTP_Server::onRecv(int fd){
         return -1;  
     }
     
-    std::println("onRecv fd={} bytes={}", fd, buf.size());
+    std::println("Received bytes={} fd={}", buf.size(), fd);
     Request req;
     int rc = parser_.parse_request(buf, &req);
-    std::println("parse_request returned {}", rc);
     if (rc == PARSE_INCOMPLETE) return 0;
     if (rc < 0) return -1;
     send_response(fd);
