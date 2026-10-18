@@ -2,7 +2,7 @@ import socket
 from cli import _core
 
 def register(services):
-    svc = services.add_parser("http", help="HTTP operations")
+    svc = services.add_parser("debug", help="HTTP operations")
     cmds = svc.add_subparsers(dest="command", required=True)
 
     ping = cmds.add_parser("ping", help="Send a GET request and print the reposne")
