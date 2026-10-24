@@ -3,10 +3,10 @@
 #include <string_view>
 #include <string>
 
-enum ContainerStatus{
-    CONTAINER_OK = 0,
-    CONTAINER_ERR_IO = -1,
-    CONTAINER_ERR_PROTO = -2,
+enum DockerStatus{
+    DOCKER_OK = 0,
+    DOCKER_ERR_IO = -1,
+    DOCKER_ERR_PROTO = -2,
 };
 
 struct ContainerResponse{
