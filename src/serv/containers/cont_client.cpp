@@ -1,4 +1,4 @@
-#include "contclient.h"
+#include "cont_client.h"
 #include "parser.h"
 
 #include <sys/socket.h>
@@ -72,15 +72,21 @@ int ContainerClient::parse_response(std::string_view raw, ContainerResponse* out
 }
 
 int ContainerClient::request(std::string_view method, std::string_view path, std::string_view body, ContainerResponse* res){
+    std::string req;
+    req.append(method).append(" ").append(path).append(" HTTP/1.0\r\n");
+    req.append("Host: docker\r\n");
+    if (!body.empty()) req.append("Content-Type: application/json\r\n");
+    req.append("Content-Length: ").append(std::to_string(body.size())).append("\r\n");
+    req.append("\r\n");
+    req.append(body);
+
     int fd = connect_socket();
     if (fd < 0 ) return fd;
 
     std::string raw;
-    std::string req;
-
     int rc = send_all(fd, req);
     if (rc == CONTAINER_OK) rc = read_all(fd, &raw);
     close(fd);
     if (rc < 0) return rc;
-    // Retun parse http request code
+    return parse_response(raw, res);
 }
