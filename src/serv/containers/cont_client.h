@@ -33,6 +33,7 @@ class ContainerClient{
 
         int connect_socket() const;
         static int send_all(int fd, std::string_view data);
-        static int read_all(int fd, std::string_view* out);
-        static int parse_response(std::string_view raw, ContainerResponse* out);
+        static int read_all(int fd, std::string* out);
+        static int parse_response(std::string_view raw, ContainerResponse* res);
+        int request(std::string_view method, std::string_view path, std::string_view body, ContainerResponse* res);
 };
