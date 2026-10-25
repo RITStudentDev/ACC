@@ -19,6 +19,7 @@ enum ContainerStatus{
 struct App{
     std::string name;
     std::string hostname;
+    std::string image;
     uint16_t container_port = 0;
 };
 
@@ -42,13 +43,13 @@ class ContainerManager{
         int app_status(std::string_view name, AppState* out) const;
 
     private:
-        ContainerClient docker_;
+        ContainerClient container_;
         std::unordered_map<std::string, App> apps_;
         std::unordered_map<std::string, std::string> host_to_name_;
 
         static bool valid_name(std::string_view s);
         static bool valid_hostname(std::string_view s);
-        static std::string container_name(std::string_view app_name);
+        static std::string container_name(std::string name);
         static std::string create_body(const App& app);
         int create_container(const App& app) const;
         int send_lifecycle(std::string_view method, const std::string& path, int ok_a, int ok_b) const;

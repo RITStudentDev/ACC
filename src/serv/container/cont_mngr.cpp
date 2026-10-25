@@ -27,3 +27,33 @@ int map_docker_err(int rc){
 }
 
 } // namespace
+
+ContainerManager::ContainerManager(ContainerClient client) :
+    container_(std::move(client))
+    {}
+
+bool ContainerManager::valid_name(std::string_view s){
+    if (s.empty() || s.size() > 63) return false;
+    for (char c : s) if (!(c >= 'a' && c <= 'z') && !(c >= '0' && c <= '9') && c != '-' && c != '_') return false;
+    return true;
+}
+
+bool ContainerManager::valid_hostname(std::string_view s){
+    if (s.empty() || s.size() > 253) return false;
+    for (char c : s) if (!in_set(c, ".-")) return false;
+    return true;
+}
+
+std::string ContainerManager::container_name(std::string name){
+    return "acc-" + name;
+}
+
+std::string ContainerManager::create_body(const App& app){
+    const std::string port = std::to_string(app.container_port) + "/tcp";
+    return "{\"Image\":\"" + app.image + "\","
+           "\"Labels\":{\"acc.managed\":\"true\"},"
+           "\"ExposedPorts\":{\"" + port + "\":{}},"
+           "\"HostConfig\":{"
+               "\"PortBindings\":{\"" + port + "\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"\"}]},"
+               "\"RestartPolicy\":{\"Name\":\"unless-stopped\"}}}";
+}
