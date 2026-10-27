@@ -73,3 +73,13 @@ int ContainerManager::add_app(const App& app){
     apps_.emplace(app.name, app);
     return CONTAINER_OK;
 }
+
+const App* ContainerManager::find_by_name(std::string_view name) const {
+    auto it = apps_.find(std::string(name));
+    return it == apps_.end() ? nullptr : &it->second;
+}
+
+const App* ContainerManager::find_by_host(std::string_view host) const {
+    auto it = host_to_name_.find(std::string(host));
+    return it == host_to_name_.end() ? nullptr : find_by_name(it->second);
+}
