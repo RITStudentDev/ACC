@@ -20,7 +20,7 @@ struct App{
     std::string name;
     std::string hostname;
     std::string image;
-    uint16_t container_port = 0;
+    uint16_t port = 0;
 };
 
 struct AppState{
@@ -48,6 +48,7 @@ class ContainerManager{
         std::unordered_map<std::string, std::string> host_to_name_;
 
         static bool valid_name(std::string_view s);
+        static bool valid_image(std::string_view s);
         static bool valid_hostname(std::string_view s);
         static std::string container_name(std::string name);
         static std::string create_body(const App& app);

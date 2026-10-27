@@ -44,16 +44,32 @@ bool ContainerManager::valid_hostname(std::string_view s){
     return true;
 }
 
+bool ContainerManager::valid_image(std::string_view s){
+    if (s.empty() || s.size() > 255) return false;
+    for (char c : s) if (!in_set(c, "._:/@-")) return false;
+    return true;
+}
+
 std::string ContainerManager::container_name(std::string name){
     return "acc-" + name;
 }
 
 std::string ContainerManager::create_body(const App& app){
-    const std::string port = std::to_string(app.container_port) + "/tcp";
+    const std::string port = std::to_string(app.port) + "/tcp";
     return "{\"Image\":\"" + app.image + "\","
            "\"Labels\":{\"acc.managed\":\"true\"},"
            "\"ExposedPorts\":{\"" + port + "\":{}},"
            "\"HostConfig\":{"
                "\"PortBindings\":{\"" + port + "\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"\"}]},"
                "\"RestartPolicy\":{\"Name\":\"unless-stopped\"}}}";
+}
+
+int ContainerManager::add_app(const App& app){
+    if (!valid_name(app.name) || !valid_image(app.image) ||
+        !valid_hostname(app.hostname) || app.port == 0) return CONTAINER_ERR_INVALID;
+    if (apps_.count(app.name) || host_to_name_.count(app.hostname)) return CONTAINER_ERR_EXISTS;
+
+    host_to_name_.emplace(app.hostname, app.name);
+    apps_.emplace(app.name, app);
+    return CONTAINER_OK;
 }
