@@ -104,6 +104,28 @@ int HTTP_Parser::parse_header_list(std::string_view& in, Header* h, int max_head
     return n_headers;
 }
 
+int HTTP_Parser::parse_status(std::string_view& in, int* minor, int* status){
+    if (consume(in, "HTTP/1.0 ")) *minor = 0;
+    else if (consume(in, "HTTP/1.1 ")) *minor = 1;
+    else return in.size() < 9 ? PARSE_INCOMPLETE : PARSE_MALFORMED;
+
+    const int len = in.size();
+    if (len < 4) return PARSE_INCOMPLETE;
+    if (!isDigit(in[0]) || !isDigit(in[1]) || !isDigit(in[2]) || in[3] != ' ') return PARSE_MALFORMED;
+    const int code = (in[0] - '0') * 100 + (in[1] - '0') * 10 + (in[2] -  '0');
+
+    int i = 4;
+    while (i < len && (isVchar(in[i]) || in[i] == '\t')) ++i;
+    if (i == len) return PARSE_INCOMPLETE;
+    if (in[i] != '\r') return PARSE_MALFORMED;
+    if (i + 1 == len) return PARSE_INCOMPLETE;
+    if (in[i + 1] != '\n') return PARSE_MALFORMED;
+
+    *status = code;
+    in.remove_prefix(i + 2);
+    return PARSE_OK;
+}
+
 int HTTP_Parser::parse_request(std::string_view in, Request* req){
     int rc;
     if ((rc = parse_method(in, &req->method)) < 0) return rc;
@@ -113,5 +135,16 @@ int HTTP_Parser::parse_request(std::string_view in, Request* req){
     rc = parse_header_list(in, req->headers, MAX_HEADERS);
     if (rc < 0) return rc;
     req->n_headers = rc;
+    return PARSE_OK;
+}
+
+int HTTP_Parser::parse_response(std::string_view in, Response* res){
+    int rc;
+    if ((rc = parse_status(in, &res->minor, &res->status)) < 0) return rc;
+
+    rc = parse_header_list(in, res->headers, MAX_HEADERS);
+    if (rc < 0) return rc;
+    res->n_headers = rc;
+    res->body = in;
     return PARSE_OK;
 }

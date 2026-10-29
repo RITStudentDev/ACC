@@ -9,6 +9,7 @@
 #include <string>
 #include "listener.h"
 #include "parser.h"
+#include "container/cont_mngr.h"
 
 /**
  * This header contains the declarations for the hosting service.
@@ -30,11 +31,13 @@ class HTTP_Server{
         std::unordered_map<int, std::string> conns_;
         HTTP_Listener listener_;
         HTTP_Parser parser_;
+        ContainerManager containers_;
 
         int init_epoll();
         int onAccept();
         int onRecv(int fd);
         static void send_response(int fd);
+        static void send_status(int fd, int code, const char* r);
         int closeConn(int fd);
         void clean();
 };
