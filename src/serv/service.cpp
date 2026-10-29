@@ -4,9 +4,32 @@
 /**
  * This file contains the implementations for the content of the service header.
  */
+
+ 
+namespace {
+
+bool iequals(std::string_view a, std::string_view b){
+    if (a.size() != b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i)
+        if (std::tolower((unsigned char)a[i]) != std::tolower((unsigned char)b[i])) return false;
+    return true;
+}
+
+std::string_view host_of(const Request& req){
+    for (int i = 0; i < req.n_headers; ++i){
+        if (!iequals(req.headers[i].name, "host")) continue;
+        std::string_view h = req.headers[i].value;
+        return h.substr(0, h.find(':'));
+    }
+    return {};
+}
+
+} // namespace
+
 HTTP_Server::HTTP_Server() :
     listener_(HTTP_Listener()),
-    parser_(std::move(HTTP_Parser()))
+    parser_(std::move(HTTP_Parser())),
+    containers_()
     {}
 HTTP_Server::~HTTP_Server(){
     clean();
