@@ -111,6 +111,13 @@ int HTTP_Server::onRecv(int fd){
     int rc = parser_.parse_request(buf, &req);
     if (rc == PARSE_INCOMPLETE) return 0;
     if (rc < 0) return -1;
+
+    const App* app = containers_.find_by_host(host_of(req));
+    if (!app){
+        send_status(fd, 404, "Not Found");
+        return -1;
+    }
+
     send_response(fd);
     return -1;
 }
@@ -150,12 +157,20 @@ int HTTP_Server::run_loop(){
 }
 
 void HTTP_Server::send_response(int fd){
-    static const char resp[] =
+    static const char res[] =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/plain\r\n"
         "Content-Length: 3\r\n"
         "Connection: close\r\n"
         "\r\n"
         "OK\n";
-    send(fd, resp, sizeof(resp) - 1, MSG_NOSIGNAL);
+    send(fd, res, sizeof(res) - 1, MSG_NOSIGNAL);
+}
+
+void HTTP_Server::send_status(int fd, int code, const char* r){
+    std::string res = "HTTP/1.1 " + std::to_string(code) + " " + r +"\r\n"
+        "Content-Length: 0\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+    send(fd, res.data(), res.size(), MSG_NOSIGNAL);
 }
