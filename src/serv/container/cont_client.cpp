@@ -71,7 +71,7 @@ int ContainerClient::parse_response(std::string_view raw, ContainerResponse* out
     return DOCKER_OK;
 }
 
-int ContainerClient::request(std::string_view method, std::string_view path, std::string_view body, ContainerResponse* res){
+int ContainerClient::request(std::string_view method, std::string_view path, std::string_view body, ContainerResponse* res) const{
     std::string req;
     req.append(method).append(" ").append(path).append(" HTTP/1.0\r\n");
     req.append("Host: docker\r\n");

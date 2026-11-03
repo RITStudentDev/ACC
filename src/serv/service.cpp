@@ -1,4 +1,5 @@
 #include "service.h"
+#include "c_sock_path.h"
 #include <print>
 
 /**
@@ -29,7 +30,8 @@ std::string_view host_of(const Request& req){
 HTTP_Server::HTTP_Server() :
     listener_(HTTP_Listener()),
     parser_(std::move(HTTP_Parser())),
-    containers_()
+    containers_(),
+    control_(containers_)
     {}
 HTTP_Server::~HTTP_Server(){
     clean();
@@ -62,6 +64,12 @@ int HTTP_Server::start_server(){
     ev.events = EPOLLIN;
     ev.data.fd = sigfd_;
     if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, sigfd_, &ev) < 0) return -1;
+
+    if (control_.start(control_socket_path()) < 0) return -1;
+    epoll_event cev{};
+    cev.events = EPOLLIN;
+    cev.data.fd = control_.listen_fd();
+    if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, control_.listen_fd(), &cev) < 0) return -1;
 
     running_ = true;
     return 0;
@@ -133,6 +141,7 @@ void HTTP_Server::clean(){
     conns_.clear();
     if (sigfd_ >= 0)   { close(sigfd_);   sigfd_ = -1; }
     if (epollfd_ >= 0) { close(epollfd_); epollfd_ = -1; }
+    control_.stop();
     listener_.stop();
 }
 
@@ -150,6 +159,8 @@ int HTTP_Server::run_loop(){
 
             if (fd == sigfd_) running_ = false;
             else if (fd == listenfd_) onAccept();
+            else if (fd == control_.listen_fd()) control_.accept_clients(epollfd_);
+            else if (control_.owns(fd)) control_.on_readable(fd);
             else if (ev & (EPOLLIN | EPOLLERR | EPOLLHUP)) if (onRecv(fd) < 0) closeConn(fd);
         }
     }

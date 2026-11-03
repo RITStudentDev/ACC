@@ -64,6 +64,37 @@ std::string ContainerManager::create_body(const App& app){
                "\"RestartPolicy\":{\"Name\":\"unless-stopped\"}}}";
 }
 
+int ContainerManager::create_container(const App& app) const {
+    ContainerResponse resp;
+    const std::string path = "/containers/create?name=" + container_name(app.name);
+    int rc = container_.request("POST", path, create_body(app), &resp);
+    if (rc < 0) return map_docker_err(rc);
+    if (resp.status == 201 || resp.status == 409) return CONTAINER_OK;
+    return CONTAINER_ERR_DOCKER;
+}
+
+int ContainerManager::start_app(std::string_view name){
+    const App* app = find_by_name(name);
+    if (!app) return CONTAINER_ERR_NOT_FOUND;
+
+    int rc = create_container(*app);
+    if (rc < 0) return rc;
+    return send_lifecycle("POST", "/containers/" + container_name(app->name) + "/start", 204, 304);
+}
+
+int ContainerManager::stop_app(std::string_view name){
+    const App* app = find_by_name(name);
+    if (!app) return CONTAINER_ERR_NOT_FOUND;
+    return send_lifecycle("POST", "/containers/" + container_name(app->name) + "/stop", 204, 304);
+}
+
+std::vector<std::string> ContainerManager::list_apps() const {
+    std::vector<std::string> names;
+    names.reserve(apps_.size());
+    for (const auto& [name, app] : apps_) names.push_back(name);
+    return names;
+}
+
 int ContainerManager::add_app(const App& app){
     if (!valid_name(app.name) || !valid_image(app.image) ||
         !valid_hostname(app.hostname) || app.port == 0) return CONTAINER_ERR_INVALID;

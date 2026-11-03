@@ -17,6 +17,11 @@
             ]
         }
     },
+    "privileged": true,
+    "mounts": [
+        "source=acc-docker-data,target=/var/lib/docker,type=volume"
+    ],
+    "postStartCommand": "sudo sh -c 'nohup dockerd > /var/log/dockerd.log 2>&1 &'",
 
     "postCreateCommand": "git --version && gcc --version && docker --version"
 }
