@@ -153,12 +153,12 @@ std::string Controller::handle_line(std::string_view line){
     if (t.empty()) return fail("empty command");
 
     const std::string_view cmd = t[0];
-    if (cmd == "add") return cmd_add(t);
-    if (cmd == "rm") return cmd_rm(t);
-    if (cmd == "up") return cmd_up(t);
-    if (cmd == "down") return cmd_down(t);
+    if (cmd == "add")    return cmd_add(t);
+    if (cmd == "rm")     return cmd_rm(t);
+    if (cmd == "up")     return cmd_up(t);
+    if (cmd == "down")   return cmd_down(t);
     if (cmd == "status") return cmd_status(t);
-    if (cmd == "list") return cmd_list(t);
+    if (cmd == "list")   return cmd_list(t);
     return fail("unknown command: " + std::string(cmd));
 }
 

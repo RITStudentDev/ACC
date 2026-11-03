@@ -13,8 +13,9 @@ install(TARGETS _core LIBRARY DESTINATION cli)
 add_executable(ACC
     src/serv/components/listener.cpp
     src/serv/components/parser.cpp
-    src/serv/components/docker_client.cpp
-    src/serv/components/container_manager.cpp
+    src/serv/container/cont_client.cpp
+    src/serv/container/cont_mngr.cpp
+    src/serv/components/controller.cpp
     src/serv/service.cpp
     src/accd.cpp
 )

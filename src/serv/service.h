@@ -9,6 +9,7 @@
 #include <string>
 #include "listener.h"
 #include "parser.h"
+#include "controller.h"
 #include "container/cont_mngr.h"
 
 /**
@@ -32,6 +33,7 @@ class HTTP_Server{
         HTTP_Listener listener_;
         HTTP_Parser parser_;
         ContainerManager containers_;
+        Controller control_;
 
         int init_epoll();
         int onAccept();

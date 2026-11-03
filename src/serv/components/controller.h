@@ -10,10 +10,24 @@ enum ControlStatus {
 };
 
 /**
- * Controller is used in the ACC service to enable CLI usage for container
- * management. It acts as a producer server for the CLI to connect to the
- * docker daemon in order to execute ACC commands.
+ * This file contains the declarations for the control channel.
+ * Its purpose is to let the CLI manage hosted apps. The daemon listens on a
+ * unix socket; the CLI sends one command per connection as a single text line
+ * and reads the reply until the daemon closes the connection.
+ *
+ * Request:  <command> [args...]\n
+ * Reply:    "OK\n" followed by zero or more payload lines, or
+ *           "ERR <message>\n"
+ *
+ * Commands:
+ *   add <name> <image> <hostname> <port>   register an app
+ *   up <name>                              create (if needed) and start its container
+ *   down <name>                            stop its container
+ *   rm <name>                              remove its container and unregister it
+ *   status <name>                          show registration and container state
+ *   list                                   show every registered app
  */
+
 class Controller{
     public:
         explicit Controller(ContainerManager& containers);
@@ -39,7 +53,7 @@ class Controller{
         std::unordered_map<int, std::string> clients_;
 
         static int send_all(int fd, std::string_view data);
-        static std::string handle_line(std::string_view line);
+        std::string handle_line(std::string_view line);
         static std::vector<std::string_view> split(std::string_view line);
         void drop(int fd);
 
