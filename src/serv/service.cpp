@@ -24,6 +24,11 @@ std::string_view host_of(const Request& req){
     return {};
 }
 
+inline std::string control_socket_path(){
+    const char* env = std::getenv("ACC_SOCKET");
+    return (env && *env) ? env : "/run/acc.sock";
+}
+
 } // namespace
 
 HTTP_Server::HTTP_Server() :
