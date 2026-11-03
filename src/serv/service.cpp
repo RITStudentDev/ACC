@@ -1,4 +1,5 @@
 #include "service.h"
+#include "c_sock_path.h"
 #include <print>
 
 /**
@@ -22,11 +23,6 @@ std::string_view host_of(const Request& req){
         return h.substr(0, h.find(':'));
     }
     return {};
-}
-
-inline std::string control_socket_path(){
-    const char* env = std::getenv("ACC_SOCKET");
-    return (env && *env) ? env : "/run/acc.sock";
 }
 
 } // namespace
