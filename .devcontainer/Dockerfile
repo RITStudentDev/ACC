@@ -6,6 +6,7 @@ RUN dnf -y update && \
         gcc \
         gcc-c++ \
         make \
+        moby-engine \
         cmake \
         docker-cli \
         sudo \
@@ -30,5 +31,5 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} && \
               ${USERNAME} && \
     echo "${USERNAME} ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME}
-
+RUN groupadd -f docker && usermod -aG docker ${USERNAME}
 USER vscode

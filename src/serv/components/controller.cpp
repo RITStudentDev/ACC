@@ -205,7 +205,7 @@ std::string Controller::cmd_add(const std::vector<std::string_view>& t){
     if (t.size() != 5) return fail("Usage: add <name> <image> <hostname> <port>");
     int port = 0;
     auto res = std::from_chars(t[4].data(), t[4].data() + t[4].size(), port);
-    if (res.ec != std::errc{} || res.ptr != t[4].data() + t[4].size() || port < 65535)
+    if (res.ec != std::errc{} || res.ptr != t[4].data() + t[4].size() || port < 1 || port > 65535)
         return fail("Invalid port");
 
     App app;
@@ -255,7 +255,7 @@ std::string Controller::cmd_status(const std::vector<std::string_view>& t){
     else if (rc < 0) return fail(describe(rc));
     std::string out = "name=" + app->name + "\n"
                       "image=" + app->image + "\n"
-                      "image=" + app->hostname+ "\n"
+                      "hostname=" + app->hostname+ "\n"
                       "container port=" + std::to_string(app->port) + "\n"
                       "state=" + status.state + "\n";
     if (status.host_port > 0) out += "host port=" + std::to_string(status.host_port) + "\n";
